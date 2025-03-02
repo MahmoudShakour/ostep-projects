@@ -9,14 +9,15 @@
 #define MAX_TOKENS 100
 #define DELIM " "
 
-char **parse_input()
+char *get_line()
 {
     char *command = NULL;
     size_t len = 0;
     int read = getline(&command, &len, stdin);
     if (read == -1)
     {
-        exit(1);
+        char error_message[30] = "An error has occurred\n";
+        write(STDERR_FILENO, error_message, strlen(error_message));
     }
 
     size_t length = strlen(command);
@@ -24,11 +25,16 @@ char **parse_input()
     {
         command[length - 1] = '\0';
     }
+    return command;
+}
 
+char **parse_command(char *command)
+{
     char **tokens = malloc(MAX_TOKENS * sizeof(char *));
     if (!tokens)
     {
-        exit(1);
+        char error_message[30] = "An error has occurred\n";
+        write(STDERR_FILENO, error_message, strlen(error_message));
     }
 
     char *ptr = command;
@@ -47,33 +53,64 @@ char **parse_input()
     return tokens;
 }
 
-int main(int argc, char *argv[])
+void handle_tokens(char **tokens, char **argv)
 {
-    while (1)
+    int x = is_builtin_command(tokens);
+    if (is_builtin_command(tokens))
     {
-        printf("wish> ");
-        char **tokens = parse_input();
-        if (!tokens)
+        handle_builtin_command(tokens);
+    }
+    else
+    {
+        int rc = fork();
+        if (rc == 0)
         {
-            exit(1);
-        }
-
-        if (is_builtin_command(tokens))
-        {
-            handle_builtin_command(tokens);
+            // char *bin = argv[1];
+            execv("/bin/ls", argv);
         }
         else
         {
-            int rc = fork();
-            if (rc == 0)
-            {
-                char *bin = argv[1];
-                execv("/bin/ls", argv);
-            }
-            else
-            {
-                wait(NULL);
-            }
+            wait(NULL);
         }
     }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc == 2)
+    {
+        char *file_name = argv[1];
+        FILE *file = fopen(file_name, "r");
+        char buffer[100];
+        while (fgets(buffer, 100, file) != NULL)
+        {
+            size_t length = strlen(buffer);
+            if (length > 0 && buffer[length - 1] == '\n')
+            {
+                buffer[length - 1] = '\0';
+            }
+            char **tokens = parse_command(buffer);
+            if (!tokens)
+            {
+                char error_message[30] = "An error has occurred\n";
+                write(STDERR_FILENO, error_message, strlen(error_message));
+            }
+            handle_tokens(tokens, argv);
+        }
+    }
+
+    while (1)
+    {
+        printf("wish> ");
+        char *command = get_line();
+        char **tokens = parse_command(command);
+        if (!tokens)
+        {
+            char error_message[30] = "An error has occurred\n";
+            write(STDERR_FILENO, error_message, strlen(error_message));
+        }
+
+        handle_tokens(tokens, argv);
+    }
+    return 0;
 }

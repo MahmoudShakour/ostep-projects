@@ -4,6 +4,12 @@
 #include "builtin.h"
 #include "exit.h"
 #include "cd.h"
+#include "path.h"
+
+
+void init_builtin_commands(){
+    init_path_command();
+}
 
 int is_builtin_command(char **tokens)
 {
@@ -28,6 +34,6 @@ void handle_builtin_command(char **tokens)
     }
     if (strcmp(tokens[0], "path") == 0)
     {
-        // handle_path_command(tokens);
+        handle_path_command(tokens);
     }
 }

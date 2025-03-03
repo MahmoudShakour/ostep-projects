@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
+int validate_exit_command(char **tokens)
+{
+    return tokens[1] == NULL;
+}
+
 void handle_exit_command(char **tokens)
 {
     int is_valid = validate_exit_command(tokens);
@@ -14,9 +19,4 @@ void handle_exit_command(char **tokens)
         return;
     }
     exit(0);
-}
-
-int validate_exit_command(char **tokens)
-{
-    return tokens[1] == NULL;
 }

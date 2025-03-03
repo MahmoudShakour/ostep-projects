@@ -1,6 +1,10 @@
 {
   "files.associations": {
     "*.rb": "ruby",
-    "cd.h": "c"
+    "cd.h": "c",
+    "non_builtin.h": "c",
+    "builtin.h": "c",
+    "path.h": "c",
+    "exit.h": "c"
   }
 }

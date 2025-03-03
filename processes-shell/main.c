@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "built-in/builtin.h"
 #include "non-built-in/non_builtin.h"
+#include "built-in/path.h"
 
 #define MAX_TOKENS 100
 #define DELIM " "
@@ -60,14 +61,25 @@ void handle_tokens(char **tokens, char **argv)
     {
         handle_builtin_command(tokens);
     }
+    else if (get_can_run_non_builtin_functions())
+    {
+        handle_non_builtin_command(tokens, get_paths());
+    }
     else
     {
-        handle_non_builtin_command(tokens);
+        char error_message[30] = "An error has occurred\n";
+        write(STDERR_FILENO, error_message, strlen(error_message));
     }
+}
+
+void init()
+{
+    init_builtin_commands();
 }
 
 int main(int argc, char *argv[])
 {
+    init();
     if (argc == 2)
     {
         char *file_name = argv[1];

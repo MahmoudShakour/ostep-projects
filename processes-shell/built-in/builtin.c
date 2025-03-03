@@ -20,7 +20,7 @@ void handle_builtin_command(char **tokens)
 {
     if (strcmp(tokens[0], "exit") == 0)
     {
-        handle_exit_command();
+        handle_exit_command(tokens);
     }
     if (strcmp(tokens[0], "cd") == 0)
     {

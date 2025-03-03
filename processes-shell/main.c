@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "built-in/builtin.h"
+#include "non-built-in/non_builtin.h"
 
 #define MAX_TOKENS 100
 #define DELIM " "
@@ -55,23 +56,13 @@ char **parse_command(char *command)
 
 void handle_tokens(char **tokens, char **argv)
 {
-    int x = is_builtin_command(tokens);
     if (is_builtin_command(tokens))
     {
         handle_builtin_command(tokens);
     }
     else
     {
-        int rc = fork();
-        if (rc == 0)
-        {
-            // char *bin = argv[1];
-            execv("/bin/ls", argv);
-        }
-        else
-        {
-            wait(NULL);
-        }
+        handle_non_builtin_command(tokens);
     }
 }
 
@@ -97,6 +88,7 @@ int main(int argc, char *argv[])
             }
             handle_tokens(tokens, argv);
         }
+        exit(0);
     }
 
     while (1)

@@ -5,6 +5,7 @@
     "non_builtin.h": "c",
     "builtin.h": "c",
     "path.h": "c",
-    "exit.h": "c"
+    "exit.h": "c",
+    "redirect.h": "c"
   }
 }

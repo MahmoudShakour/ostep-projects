@@ -49,7 +49,6 @@ char **parse_command(char *command)
     {
         if (*token == '\0')
             continue;
-
         tokens[idx++] = strdup(token);
     }
     tokens[idx] = NULL;
@@ -128,6 +127,8 @@ int main(int argc, char *argv[])
                     char error_message[30] = "An error has occurred\n";
                     write(STDERR_FILENO, error_message, strlen(error_message));
                 }
+                if (!tokens[0])
+                    continue;
                 execute_command(tokens);
             }
         }
@@ -143,6 +144,8 @@ int main(int argc, char *argv[])
             char error_message[30] = "An error has occurred\n";
             write(STDERR_FILENO, error_message, strlen(error_message));
         }
+        if (!tokens[0])
+            continue;
         execute_command(tokens);
     }
     return 0;

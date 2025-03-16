@@ -93,6 +93,42 @@ void execute_command(char **tokens)
     }
 }
 
+int check_multiple_commands(char *command)
+{
+    for (int i = 0; command[i]; i++)
+    {
+        if (command[i] == '&')
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+char **split_multiple_commands(char *command)
+{
+    char **commands = malloc(MAX_TOKENS * sizeof(char *));
+    if (!commands)
+    {
+        char error_message[30] = "An error has occurred\n";
+        write(STDERR_FILENO, error_message, strlen(error_message));
+    }
+
+    char *ptr = command;
+    int idx = 0;
+    char *token;
+
+    while ((token = strsep(&ptr, "&")) != NULL)
+    {
+        if (*token == '\0')
+            continue;
+        commands[idx++] = strdup(token);
+    }
+    commands[idx] = NULL;
+
+    return commands;
+}
+
 void init()
 {
     init_builtin_commands();
@@ -121,15 +157,22 @@ int main(int argc, char *argv[])
                 {
                     buffer[length - 1] = '\0';
                 }
-                char **tokens = parse_command(buffer);
-                if (!tokens)
+
+                char **commands = split_multiple_commands(buffer);
+                for (int i = 0; commands[i]; i++)
                 {
-                    char error_message[30] = "An error has occurred\n";
-                    write(STDERR_FILENO, error_message, strlen(error_message));
+                    char **tokens = parse_command(commands[i]);
+                    if (!tokens)
+                    {
+                        char error_message[30] = "An error has occurred\n";
+                        write(STDERR_FILENO, error_message, strlen(error_message));
+                    }
+                    if (!tokens[0])
+                        continue;
+                    execute_command(tokens);
                 }
-                if (!tokens[0])
-                    continue;
-                execute_command(tokens);
+                while (wait(NULL) > 0)
+                    ;
             }
         }
     }
@@ -138,15 +181,22 @@ int main(int argc, char *argv[])
     {
         printf("wish> ");
         char *command = get_line();
-        char **tokens = parse_command(command);
-        if (!tokens)
+
+        char **commands = split_multiple_commands(command);
+        for (int i = 0; commands[i]; i++)
         {
-            char error_message[30] = "An error has occurred\n";
-            write(STDERR_FILENO, error_message, strlen(error_message));
+            char **tokens = parse_command(commands[i]);
+            if (!tokens)
+            {
+                char error_message[30] = "An error has occurred\n";
+                write(STDERR_FILENO, error_message, strlen(error_message));
+            }
+            if (!tokens[0])
+                continue;
+            execute_command(tokens);
+            while (wait(NULL) > 0)
+                ;
         }
-        if (!tokens[0])
-            continue;
-        execute_command(tokens);
     }
     return 0;
 }

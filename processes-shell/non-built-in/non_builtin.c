@@ -39,8 +39,4 @@ void handle_non_builtin_command(char **tokens, char **paths)
         char error_message[30] = "An error has occurred\n";
         write(STDERR_FILENO, error_message, strlen(error_message));
     }
-    else
-    {
-        wait(NULL);
-    }
 }
